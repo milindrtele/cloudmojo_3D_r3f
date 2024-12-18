@@ -1,8 +1,15 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
-import { SoftShadows, useGLTF, OrbitControls, Stats, MeshReflectorMaterial, Environment} from "@react-three/drei";
-import { useControls } from "leva"
+import {
+  SoftShadows,
+  useGLTF,
+  OrbitControls,
+  Stats,
+  MeshReflectorMaterial,
+  Environment,
+} from "@react-three/drei";
+import { useControls } from "leva";
 
 const ModelWithMaterials = () => {
   const { scene } = useGLTF("/models/only_objects.glb");
@@ -32,6 +39,8 @@ const ModelWithMaterials = () => {
           roughness: 0.35,
           ior: 1.75,
           thickness: 1,
+          clearcoat: 0.5,
+          clearcoatRoughness: 0.1,
           attenuationColor: new THREE.Color("#dbf6ff"),
           attenuationDistance: 0.4,
           specularIntensity: 1,
@@ -50,11 +59,13 @@ const ModelWithMaterials = () => {
           roughness: 0.35,
           ior: 1.75,
           thickness: 1,
+          clearcoat: 0.5,
+          clearcoatRoughness: 0.1,
           attenuationColor: new THREE.Color("#1cbcf2"),
           attenuationDistance: 0.4,
           specularIntensity: 1,
           specularColor: new THREE.Color("#ffffff"),
-          //side:THREE.DoubleSide
+          //side: THREE.DoubleSide,
         });
         break;
 
@@ -84,9 +95,10 @@ const App = () => {
         background
         backgroundBlurriness={0.5}
       />
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={10} />
       <directionalLight
         castShadow
+        intensity={10}
         position={[-10, 10, 5]}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -99,7 +111,7 @@ const App = () => {
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
         <planeGeometry args={[30, 30]} />
         <MeshReflectorMaterial
-          blur={[100,100]} // Reduced for performance
+          blur={[100, 100]} // Reduced for performance
           resolution={1024}
           mixBlur={1}
           mixStrength={180}
@@ -111,9 +123,13 @@ const App = () => {
           metalness={0.0}
         />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
-          <planeGeometry args={[30, 30]} />
-          <shadowMaterial transparent opacity={0.4} />
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0.01, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[30, 30]} />
+        <shadowMaterial transparent opacity={0.4} />
       </mesh>
       <OrbitControls />
       <Stats />
