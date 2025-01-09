@@ -280,8 +280,8 @@ const App = () => {
         <planeGeometry args={[30, 30]} />
         <shadowMaterial transparent opacity={0.4} />
       </mesh>
-      {/* <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} /> */}
-      <CameraMouseRotation />
+      <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} />
+      {/* <CameraMouseRotation /> */}
       <Stats />
     </Canvas>
   );
