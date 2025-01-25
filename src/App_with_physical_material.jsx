@@ -35,7 +35,7 @@ const CameraMouseRotation = () => {
 useFrame(() => {
     const rotationSpeed = 2;
   
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * rotationSpeed, 0.5);
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x*1.5, mouse.x * rotationSpeed, 0.5);
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, Math.max(mouse.y * rotationSpeed + 2, 2), 0.5);
   
     camera.lookAt(0, 2, 0);
@@ -110,7 +110,7 @@ useFrame(() => {
 // };
 
 function Model() {
-  const { nodes } = useGLTF("/models/only_objects_2.glb");
+  const { nodes } = useGLTF("/models/only_objects_3.glb");
 
   const light_material = {
     color: 0xffffff,
@@ -174,6 +174,45 @@ function Model() {
     side:THREE.DoubleSide
   };
 
+  const background_walls_f = {
+    color: 0xffffff,
+    transmission: 1,
+    opacity: 0,
+    metalness: 0,
+    roughness: 0.35,
+    ior: 1.4,
+    thickness: 1,
+    attenuationColor: new THREE.Color("#e9eef7"),
+    attenuationDistance: 0.4,
+    specularIntensity: 1,
+    specularColor: new THREE.Color("#ffffff"),
+  };
+
+  const background_walls_b = {
+    color: 0xffffff,
+    transmission: 1,
+    opacity: 0,
+    metalness: 0,
+    roughness: 0.35,
+    ior: 1.4,
+    thickness: 1,
+    attenuationColor: new THREE.Color("#e9eef7"),
+    attenuationDistance: 0.4,
+    specularIntensity: 1,
+    specularColor: new THREE.Color("#ffffff"),
+    side:THREE.DoubleSide
+  };
+
+  const dome_material = {
+    color: 0xffffff,
+    // transmission: 0,
+    // opacity: 1,
+    metalness: 0,
+    roughness: 0.35,
+    specularIntensity: 1,
+    specularColor: new THREE.Color("#ffffff"),
+  };
+
   // Helper function to render children of a parent
   const renderChildren = (parent, materialProp) => {
     return parent.children.map((child, index) => (
@@ -188,6 +227,46 @@ function Model() {
       </mesh>
     ));
   };
+
+    // Helper function to render children of a parent
+    const renderDome = (parent, materialProp) => {
+      return parent.children.map((child, index) => (
+        <mesh
+          key={index}
+          geometry={child.geometry}
+          onClick={() => console.log(`Clicked on ${child.name}`)}
+        >
+          <meshPhysicalMaterial {...materialProp} />
+        </mesh>
+      ));
+    };
+
+    // Helper function to render children of a parent
+    const renderGround = (parent, materialProp) => {
+      return parent.children.map((child, index) => (
+        <mesh
+          key={index}
+          geometry={child.geometry}
+          castShadow={true}
+          receiveShadow={true}
+          onClick={() => console.log(`Clicked on ${child.name}`)}
+        >
+          <MeshReflectorMaterial
+          blur={[300, 100]}
+          resolution={1024}
+          mixBlur={1}
+          mixStrength={80}
+          roughness={1}
+          depthScale={1.2}
+          minDepthThreshold={0.4}
+          maxDepthThreshold={1.4}
+          color="#050505"
+          metalness={0.1}
+          mirror={0}
+        />
+        </mesh>
+      ));
+    };
 
   return (
     <CubeCamera frames={1}>
@@ -217,6 +296,30 @@ function Model() {
               envMap: texture,
             })}
           </group>
+          <group name="dome">
+            {renderDome(nodes.dome, {
+              ...dome_material,
+              envMap: texture,
+            })}
+          </group>
+          <group name="background_walls_f">
+            {renderDome(nodes.background_walls_f, {
+              ...background_walls_f,
+              envMap: texture,
+            })}
+          </group>
+          <group name="background_walls_b">
+            {renderDome(nodes.background_walls_b, {
+              ...background_walls_b,
+              envMap: texture,
+            })}
+          </group>
+          {/* <group name="ground">
+            {renderGround(nodes.ground, {
+              ...dome_material,
+              envMap: texture,
+            })}
+          </group> */}
         </group>
       )}
     </CubeCamera>
@@ -247,7 +350,7 @@ const App = () => {
       <ambientLight intensity={0.5} />
       <directionalLight
         castShadow
-        position={[-10, 10, 5]}
+        position={[-5, 15, 5]}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
         shadow-camera-left={-10}
@@ -258,18 +361,43 @@ const App = () => {
       <Model />
       {/* <ModelWithMaterials /> */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[30, 30]} />
+        <planeGeometry args={[100, 100]} />
         <MeshReflectorMaterial
-          blur={[100, 100]} // Reduced for performance
+          // blur={[300, 100]} // Reduced for performance
+          // resolution={1024}
+          // mixBlur={1}
+          // mixStrength={180}
+          // roughness={1}
+          // depthScale={1.2}
+          // minDepthThreshold={0.4}
+          // maxDepthThreshold={1.4}
+          // color="#050505" //"#8f8d8d"
+          // metalness={0.0}
+          //
+          // blur={[400, 100]}
+          // resolution={1024}
+          // mixBlur={1}
+          // mixStrength={80}
+          // roughness={1}
+          // depthScale={1.2}
+          // minDepthThreshold={0.4}
+          // maxDepthThreshold={1.4}
+          // color="#0A0A0A" //"#050505"
+          // metalness={0.1}
+          // mirror={0}
+          //
+          blur={[400, 100]}
           resolution={1024}
           mixBlur={1}
-          mixStrength={180}
-          roughness={0.5}
-          depthScale={1.2}
-          minDepthThreshold={0.4}
-          maxDepthThreshold={1.4}
-          color="#050505" //"#8f8d8d"
-          metalness={0.0}
+          mixStrength={15}
+          depthScale={1}
+          minDepthThreshold={0.5}
+          depthToBlurRatioBias={1}
+          distortion={1}
+          //maxDepthThreshold={2}
+          color="#151515"
+          metalness={0}
+          roughness={1}
         />
       </mesh>
       <mesh
@@ -281,7 +409,7 @@ const App = () => {
         <shadowMaterial transparent opacity={0.4} />
       </mesh>
       <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} />
-      {/* <CameraMouseRotation /> */}
+      <CameraMouseRotation />
       <Stats />
     </Canvas>
   );
