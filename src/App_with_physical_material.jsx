@@ -32,15 +32,22 @@ const CameraMouseRotation = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-useFrame(() => {
+  useFrame(() => {
     const rotationSpeed = 2;
-  
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mouse.x * rotationSpeed, 0.5);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, Math.max(mouse.y * rotationSpeed + 2, 2), 0.5);
-  
+
+    camera.position.x = THREE.MathUtils.lerp(
+      camera.position.x,
+      mouse.x * rotationSpeed,
+      0.5
+    );
+    camera.position.y = THREE.MathUtils.lerp(
+      camera.position.y,
+      Math.max(mouse.y * rotationSpeed + 2, 2),
+      0.5
+    );
+
     camera.lookAt(0, 2, 0);
   });
-  
 
   return null;
 };
@@ -141,7 +148,7 @@ function Model() {
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
     envMapIntensity: 1,
-    side:THREE.DoubleSide
+    side: THREE.DoubleSide,
   };
 
   const dark_material = {
@@ -171,7 +178,7 @@ function Model() {
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
-    side:THREE.DoubleSide
+    side: THREE.DoubleSide,
   };
 
   // Helper function to render children of a parent
@@ -281,7 +288,7 @@ const App = () => {
         <shadowMaterial transparent opacity={0.4} />
       </mesh>
       <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} />
-      {/* <CameraMouseRotation /> */}
+      <CameraMouseRotation />
       <Stats />
     </Canvas>
   );
