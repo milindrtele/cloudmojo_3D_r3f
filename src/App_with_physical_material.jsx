@@ -15,6 +15,8 @@ import { ContactShadows } from "@react-three/drei";
 import { useControls } from "leva";
 
 import { useThree, useFrame } from "@react-three/fiber";
+import { clearcoat } from "three/tsl";
+import { clearcoatRoughness } from "three/src/nodes/TSL.js";
 
 const CameraMouseRotation = () => {
   const { camera } = useThree();
@@ -32,15 +34,22 @@ const CameraMouseRotation = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-useFrame(() => {
+  useFrame(() => {
     const rotationSpeed = 2;
-  
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x*1.5, mouse.x * rotationSpeed, 0.5);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, Math.max(mouse.y * rotationSpeed + 2, 2), 0.5);
-  
+
+    camera.position.x = THREE.MathUtils.lerp(
+      camera.position.x * 1.5,
+      mouse.x * rotationSpeed,
+      0.5
+    );
+    camera.position.y = THREE.MathUtils.lerp(
+      camera.position.y,
+      Math.max(mouse.y * rotationSpeed + 2, 2),
+      0.5
+    );
+
     camera.lookAt(0, 2, 0);
   });
-  
 
   return null;
 };
@@ -110,7 +119,7 @@ useFrame(() => {
 // };
 
 function Model() {
-  const { nodes } = useGLTF("/models/only_objects_3.glb");
+  const { nodes } = useGLTF("/models/only_objects_4.glb");
 
   const light_material = {
     color: 0xffffff,
@@ -125,6 +134,8 @@ function Model() {
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
     envMapIntensity: 1,
+    clearcoat: 1,
+    clearcoatRoughness: 0,
     //side:THREE.DoubleSide
   };
 
@@ -141,7 +152,9 @@ function Model() {
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
     envMapIntensity: 1,
-    side:THREE.DoubleSide
+    clearcoat: 1,
+    clearcoatRoughness: 0,
+    side: THREE.DoubleSide,
   };
 
   const dark_material = {
@@ -156,6 +169,8 @@ function Model() {
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
+    clearcoat: 1,
+    clearcoatRoughness: 0,
     //side:THREE.DoubleSide
   };
 
@@ -171,7 +186,9 @@ function Model() {
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
-    side:THREE.DoubleSide
+    clearcoat: 1,
+    clearcoatRoughness: 0,
+    side: THREE.DoubleSide,
   };
 
   const background_walls_f = {
@@ -186,6 +203,8 @@ function Model() {
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
+    clearcoat: 1,
+    clearcoatRoughness: 0,
   };
 
   const background_walls_b = {
@@ -200,7 +219,9 @@ function Model() {
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
-    side:THREE.DoubleSide
+    clearcoat: 1,
+    clearcoatRoughness: 0,
+    side: THREE.DoubleSide,
   };
 
   const dome_material = {
@@ -228,30 +249,30 @@ function Model() {
     ));
   };
 
-    // Helper function to render children of a parent
-    const renderDome = (parent, materialProp) => {
-      return parent.children.map((child, index) => (
-        <mesh
-          key={index}
-          geometry={child.geometry}
-          onClick={() => console.log(`Clicked on ${child.name}`)}
-        >
-          <meshPhysicalMaterial {...materialProp} />
-        </mesh>
-      ));
-    };
+  // Helper function to render children of a parent
+  const renderDome = (parent, materialProp) => {
+    return parent.children.map((child, index) => (
+      <mesh
+        key={index}
+        geometry={child.geometry}
+        onClick={() => console.log(`Clicked on ${child.name}`)}
+      >
+        <meshPhysicalMaterial {...materialProp} />
+      </mesh>
+    ));
+  };
 
-    // Helper function to render children of a parent
-    const renderGround = (parent, materialProp) => {
-      return parent.children.map((child, index) => (
-        <mesh
-          key={index}
-          geometry={child.geometry}
-          castShadow={true}
-          receiveShadow={true}
-          onClick={() => console.log(`Clicked on ${child.name}`)}
-        >
-          <MeshReflectorMaterial
+  // Helper function to render children of a parent
+  const renderGround = (parent, materialProp) => {
+    return parent.children.map((child, index) => (
+      <mesh
+        key={index}
+        geometry={child.geometry}
+        castShadow={true}
+        receiveShadow={true}
+        onClick={() => console.log(`Clicked on ${child.name}`)}
+      >
+        <MeshReflectorMaterial
           blur={[300, 100]}
           resolution={1024}
           mixBlur={1}
@@ -264,9 +285,9 @@ function Model() {
           metalness={0.1}
           mirror={0}
         />
-        </mesh>
-      ));
-    };
+      </mesh>
+    ));
+  };
 
   return (
     <CubeCamera frames={1}>
@@ -395,7 +416,7 @@ const App = () => {
           depthToBlurRatioBias={1}
           distortion={1}
           //maxDepthThreshold={2}
-          color="#151515"
+          color="#2B2B2B" //#151515
           metalness={0}
           roughness={1}
         />
