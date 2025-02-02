@@ -18,6 +18,35 @@ import { useThree, useFrame } from "@react-three/fiber";
 import { clearcoat } from "three/tsl";
 import { clearcoatRoughness } from "three/src/nodes/TSL.js";
 
+// const CameraMouseRotation = () => {
+//   const { camera, gl } = useThree(); // Get renderer instance
+//   const [mouse, setMouse] = useState({ x: 0, y: 0 });
+//   const invalidate = useThree((state) => state.invalidate)
+
+//   useEffect(() => {
+//     const handleMouseMove = (event) => {
+//       setMouse({
+//         x: (event.clientX / window.innerWidth) * 2 - 1,
+//         y: -(event.clientY / window.innerHeight) * 2 + 1,
+//       });
+
+//       invalidate(); // Trigger re-render only on mouse move
+//     };
+
+//     gl.domElement.addEventListener("mousemove", handleMouseMove);
+//     return () => gl.domElement.removeEventListener("mousemove", handleMouseMove);
+//   }, [gl, invalidate]);
+
+//   useFrame(() => {
+//     const rotationSpeed = 2;
+//     camera.position.x = THREE.MathUtils.lerp(camera.position.x * 1.5, mouse.x * rotationSpeed, 0.5);
+//     camera.position.y = THREE.MathUtils.lerp(camera.position.y, Math.max(mouse.y * rotationSpeed + 2, 2), 0.5);
+//     camera.lookAt(0, 2, 0);
+//   }, 1); // Priority 1 to prevent unnecessary frames
+
+//   return null;
+// };
+
 const CameraMouseRotation = () => {
   const { camera } = useThree();
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
@@ -118,7 +147,7 @@ const CameraMouseRotation = () => {
 //   return <primitive object={scene} />;
 // };
 
-function Model() {
+function Model({dark_material_color, light_material_color}) {
   const { nodes } = useGLTF("/models/only_objects_4.glb");
 
   const light_material = {
@@ -129,7 +158,7 @@ function Model() {
     roughness: 0.35,
     ior: 1.75,
     thickness: 1,
-    attenuationColor: new THREE.Color("#dbf6ff"),
+    //attenuationColor: new THREE.Color("#dbf6ff"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
@@ -147,7 +176,7 @@ function Model() {
     roughness: 0.35,
     ior: 1.75,
     thickness: 1,
-    attenuationColor: new THREE.Color("#dbf6ff"),
+    //attenuationColor: new THREE.Color("#dbf6ff"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
@@ -165,7 +194,7 @@ function Model() {
     roughness: 0.35,
     ior: 1.4,
     thickness: 1,
-    attenuationColor: new THREE.Color("#1cbcf2"),
+    // attenuationColor: new THREE.Color("#1cbcf2"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
@@ -182,7 +211,7 @@ function Model() {
     roughness: 0.35,
     ior: 1.4,
     thickness: 1,
-    attenuationColor: new THREE.Color("#1cbcf2"),
+    //attenuationColor: new THREE.Color("#1cbcf2"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
     specularColor: new THREE.Color("#ffffff"),
@@ -296,24 +325,29 @@ function Model() {
           <group name="light_material">
             {renderChildren(nodes.light_material, {
               ...light_material,
+              attenuationColor:  new THREE.Color(light_material_color),//new THREE.Color("#dbf6ff"),
               envMap: texture,
             })}
           </group>
           <group name="dark_material">
             {renderChildren(nodes.dark_material, {
               ...dark_material,
+              attenuationColor:  new THREE.Color(dark_material_color),//new THREE.Color("#1cbcf2"),
               envMap: texture,
             })}
           </group>
           <group name="background_light">
             {renderChildren(nodes.background_light, {
               ...background_light_material,
+              attenuationColor:  new THREE.Color(light_material_color),//new THREE.Color("#dbf6ff"),
+              
               envMap: texture,
             })}
           </group>
           <group name="background_dark">
             {renderChildren(nodes.background_dark, {
               ...background_dark_material,
+              attenuationColor:  new THREE.Color(dark_material_color),//new THREE.Color("#1cbcf2"),
               envMap: texture,
             })}
           </group>
@@ -353,7 +387,13 @@ const App = () => {
     size: { value: 15, min: 0, max: 50 },
     focus: { value: 0.5, min: 0, max: 2 },
     samples: { value: 6, min: 1, max: 10, step: 1 },
+    dark_material_color: {value:"#1cbcf2"},
+    light_material_color: {value:"#dbf6ff"},
   });
+
+  useEffect(()=>{
+    console.log(config);
+  },[]);
 
   return (
     <Canvas
@@ -361,6 +401,8 @@ const App = () => {
       className="canvas"
       camera={{ position: [0, 2, 7.5], fov: 75 }}
     >
+      {/* <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} /> */}
+      <CameraMouseRotation />
       {enabled && <SoftShadows {...config} />}
       {/* <ContactShadows position={[0, -7, 0]} opacity={0.75} scale={40} blur={1} far={9} /> */}
       <Environment
@@ -379,7 +421,7 @@ const App = () => {
         shadow-camera-top={10}
         shadow-camera-bottom={-10}
       />
-      <Model />
+      <Model {...config}/>
       {/* <ModelWithMaterials /> */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
         <planeGeometry args={[100, 100]} />
@@ -429,8 +471,6 @@ const App = () => {
         <planeGeometry args={[30, 30]} />
         <shadowMaterial transparent opacity={0.4} />
       </mesh>
-      <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} />
-      <CameraMouseRotation />
       <Stats />
     </Canvas>
   );
