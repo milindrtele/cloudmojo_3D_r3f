@@ -401,7 +401,7 @@ const App = () => {
       className="canvas"
       camera={{ position: [0, 2, 7.5], fov: 75 }}
     >
-      {/* <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} /> */}
+      <OrbitControls target={[0, 2, 0]} maxPolarAngle={Math.PI / 2} />
       <CameraMouseRotation />
       {enabled && <SoftShadows {...config} />}
       {/* <ContactShadows position={[0, -7, 0]} opacity={0.75} scale={40} blur={1} far={9} /> */}
