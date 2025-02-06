@@ -13,10 +13,12 @@ import {
 } from "@react-three/drei";
 import { ContactShadows } from "@react-three/drei";
 import { useControls } from "leva";
+import { useLoader } from "@react-three/fiber";
 
 import { useThree, useFrame } from "@react-three/fiber";
 import { clearcoat } from "three/tsl";
 import { clearcoatRoughness } from "three/src/nodes/TSL.js";
+import { TextureLoader } from "three/src/loaders/TextureLoader";
 
 // const CameraMouseRotation = () => {
 //   const { camera, gl } = useThree(); // Get renderer instance
@@ -147,8 +149,13 @@ const CameraMouseRotation = () => {
 //   return <primitive object={scene} />;
 // };
 
-function Model({dark_material_color, light_material_color}) {
-  const { nodes } = useGLTF("/models/only_objects_4.glb");
+function Model({ dark_material_color, light_material_color, thickness_map }) {
+  const { nodes } = useGLTF("/models/beveled_2_baking thickness map.glb"); ///models/only_objects_4.glb
+  const thicknessTexture = useLoader(
+    TextureLoader,
+    "/textures/thickness_3.jpg"
+  );
+  thicknessTexture.flipY = false;
 
   const light_material = {
     color: 0xffffff,
@@ -158,6 +165,7 @@ function Model({dark_material_color, light_material_color}) {
     roughness: 0.35,
     ior: 1.75,
     thickness: 1,
+    thicknessMap: thicknessTexture,
     //attenuationColor: new THREE.Color("#dbf6ff"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
@@ -176,6 +184,7 @@ function Model({dark_material_color, light_material_color}) {
     roughness: 0.35,
     ior: 1.75,
     thickness: 1,
+    thicknessMap: thicknessTexture,
     //attenuationColor: new THREE.Color("#dbf6ff"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
@@ -194,6 +203,7 @@ function Model({dark_material_color, light_material_color}) {
     roughness: 0.35,
     ior: 1.4,
     thickness: 1,
+    thicknessMap: thicknessTexture,
     // attenuationColor: new THREE.Color("#1cbcf2"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
@@ -211,6 +221,7 @@ function Model({dark_material_color, light_material_color}) {
     roughness: 0.35,
     ior: 1.4,
     thickness: 1,
+    thicknessMap: thicknessTexture,
     //attenuationColor: new THREE.Color("#1cbcf2"),
     attenuationDistance: 0.4,
     specularIntensity: 1,
@@ -264,7 +275,7 @@ function Model({dark_material_color, light_material_color}) {
   };
 
   // Helper function to render children of a parent
-  const renderChildren = (parent, materialProp) => {
+  const renderChildren = (parent, materialProp, thickness_map) => {
     return parent.children.map((child, index) => (
       <mesh
         key={index}
@@ -273,7 +284,12 @@ function Model({dark_material_color, light_material_color}) {
         receiveShadow={true}
         onClick={() => console.log(`Clicked on ${child.name}`)}
       >
-        <meshPhysicalMaterial {...materialProp} />
+        <meshPhysicalMaterial
+          {...materialProp}
+          {...(thickness_map
+            ? { thicknessMap: thicknessTexture }
+            : { thicknessMap: null })}
+        />
       </mesh>
     ));
   };
@@ -323,33 +339,50 @@ function Model({dark_material_color, light_material_color}) {
       {(texture) => (
         <group>
           <group name="light_material">
-            {renderChildren(nodes.light_material, {
-              ...light_material,
-              attenuationColor:  new THREE.Color(light_material_color),//new THREE.Color("#dbf6ff"),
-              envMap: texture,
-            })}
+            {renderChildren(
+              nodes.light_material,
+              {
+                ...light_material,
+                attenuationColor: new THREE.Color(light_material_color), //new THREE.Color("#dbf6ff"),
+                envMap: texture,
+                // {thickness_map && thicknessMap: thicknessTexture},
+              },
+              thickness_map
+            )}
           </group>
           <group name="dark_material">
-            {renderChildren(nodes.dark_material, {
-              ...dark_material,
-              attenuationColor:  new THREE.Color(dark_material_color),//new THREE.Color("#1cbcf2"),
-              envMap: texture,
-            })}
+            {renderChildren(
+              nodes.dark_material,
+              {
+                ...dark_material,
+                attenuationColor: new THREE.Color(dark_material_color), //new THREE.Color("#1cbcf2"),
+                envMap: texture,
+              },
+              thickness_map
+            )}
           </group>
           <group name="background_light">
-            {renderChildren(nodes.background_light, {
-              ...background_light_material,
-              attenuationColor:  new THREE.Color(light_material_color),//new THREE.Color("#dbf6ff"),
-              
-              envMap: texture,
-            })}
+            {renderChildren(
+              nodes.background_light,
+              {
+                ...background_light_material,
+                attenuationColor: new THREE.Color(light_material_color), //new THREE.Color("#dbf6ff"),
+
+                envMap: texture,
+              },
+              thickness_map
+            )}
           </group>
           <group name="background_dark">
-            {renderChildren(nodes.background_dark, {
-              ...background_dark_material,
-              attenuationColor:  new THREE.Color(dark_material_color),//new THREE.Color("#1cbcf2"),
-              envMap: texture,
-            })}
+            {renderChildren(
+              nodes.background_dark,
+              {
+                ...background_dark_material,
+                attenuationColor: new THREE.Color(dark_material_color), //new THREE.Color("#1cbcf2"),
+                envMap: texture,
+              },
+              thickness_map
+            )}
           </group>
           <group name="dome">
             {renderDome(nodes.dome, {
@@ -387,13 +420,14 @@ const App = () => {
     size: { value: 15, min: 0, max: 50 },
     focus: { value: 0.5, min: 0, max: 2 },
     samples: { value: 6, min: 1, max: 10, step: 1 },
-    dark_material_color: {value:"#1cbcf2"},
-    light_material_color: {value:"#dbf6ff"},
+    dark_material_color: { value: "#1cbcf2" },
+    light_material_color: { value: "#dbf6ff" },
+    thickness_map: true,
   });
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(config);
-  },[]);
+  }, []);
 
   return (
     <Canvas
@@ -421,7 +455,7 @@ const App = () => {
         shadow-camera-top={10}
         shadow-camera-bottom={-10}
       />
-      <Model {...config}/>
+      <Model {...config} />
       {/* <ModelWithMaterials /> */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
         <planeGeometry args={[100, 100]} />
